@@ -13,10 +13,24 @@ var (
 	forceDelete bool
 )
 
-func runDelete(cmd *cobra.Command, args []string) error {
-	arcNameOrId := args[0]
+var deleteCmd = &cobra.Command{
+	Use: "delete <arc-name-or-id",
+	Short: "Delete an arc permanently",
+	Long: "Delete an arc and all its documents permanently. This cannot be undone!",
+	Aliases: []string{"rm", "del"},
+	Args: cobra.ExactArgs(1),
+	RunE: runDelete,
+}
 
-	entry, err := arcManager.FindArc(arcNameOrId)
+func init() {
+	rootCmd.AddCommand(deleteCmd)
+	deleteCmd.Flags().BoolVarP(&forceDelete, "force", "f", false, "Skip confirmation prompt")
+}
+
+func runDelete(cmd *cobra.Command, args []string) error {
+	arcNameOrID := args[0]
+
+	entry, err := arcManager.FindArc(arcNameOrID)
 	if err != nil {
 		return err
 	}

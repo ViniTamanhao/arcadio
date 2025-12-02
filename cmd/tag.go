@@ -9,7 +9,7 @@ import (
 )
 
 var tagCmd = &cobra.Command{
-	Use:   "tag <arc-id> <doc-id> <tag1> [tag2...]",
+	Use:   "tag <arc-name-or-id> <doc-id> <tag1> [tag2...]",
 	Short: "Add tags to a document",
 	Args:  cobra.MinimumNArgs(3),
 	RunE:  runTag,
@@ -20,11 +20,16 @@ func init() {
 }
 
 func runTag(cmd *cobra.Command, args []string) error {
-	arcID := args[0]
+	arcNameOrID := args[0]
 	docID := args[1]
 	tags := args[2:]
 
-	// Get password
+	entry, err := arcManager.FindArc(arcNameOrID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Adding tags to document in arc: %s\n", entry.Name)
 	fmt.Print("Enter password: ")
 	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
@@ -34,14 +39,12 @@ func runTag(cmd *cobra.Command, args []string) error {
 
 	password := string(passwordBytes)
 
-	// Unlock arc
-	arc, key, err := arcManager.Unlock(arcID, password)
+	arc, key, err := arcManager.Unlock(entry.ID, password)
 	if err != nil {
 		return err
 	}
 
-	// Add tags
-	if err := arcManager.AddTags(arcID, arc, key, docID, tags); err != nil {
+	if err := arcManager.AddTags(entry.ID, arc, key, docID, tags); err != nil {
 		return err
 	}
 

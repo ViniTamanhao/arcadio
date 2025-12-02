@@ -156,7 +156,7 @@ func (m *Manager) GetDocumentPath(arcID, docID string) string {
 
 // saveSecurityConfig saves the security config of a certain arc
 func (m *Manager) saveSecurityConfig(arcDir string, config *models.SecurityConfig) error {
-	data, err := json.Marshal(config)
+	data, err := json.MarshalIndent(config, "", " ")
 	if err != nil {
 		return err
 	}

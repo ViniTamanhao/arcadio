@@ -23,7 +23,6 @@ func init() {
 func runInfo(cmd *cobra.Command, args []string) error {
 	arcNameOrID := args[0]
 
-	// Get password
 	fmt.Print("Enter password: ")
 	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
@@ -33,7 +32,6 @@ func runInfo(cmd *cobra.Command, args []string) error {
 
 	password := string(passwordBytes)
 
-	// Unlock arc (now accepts name or ID!)
 	arc, _, err := arcManager.Unlock(arcNameOrID, password)
 	if err != nil {
 		return fmt.Errorf("failed to unlock arc: %w", err)
@@ -49,7 +47,6 @@ func runInfo(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Tags:         %d unique\n", countUniqueTags(arc.Tags))
 	fmt.Printf("Encryption:   %s\n", arc.EncryptionVersion)
 
-	// Calculate total size
 	var totalSize int64
 	for _, doc := range arc.Documents {
 		totalSize += doc.Size

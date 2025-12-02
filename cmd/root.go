@@ -36,7 +36,7 @@ func initConfig() {
 	if baseDir == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Errorf("error getting home directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "error getting home directory: %v\n", err)
 			os.Exit(1)
 		}
 		baseDir = filepath.Join(home, ".arcadio", "arcs")
@@ -47,5 +47,10 @@ func initConfig() {
 		os.Exit(1)
 	}
 
-	arcManager = arc.NewManager(baseDir)
+	var err error
+	arcManager, err = arc.NewManager(baseDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error initiating arc manager: %v\n", err)
+		os.Exit(1)
+	}
 }

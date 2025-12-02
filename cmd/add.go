@@ -17,7 +17,7 @@ var (
 )
 
 var addCmd = &cobra.Command{
-	Use: "add <arc-id> <file-or-directory>",
+	Use: "add <arc-name-or-id> <file-or-directory>",
 	Short: "Add documents to an arc",
 	Long: `Add one or more documents to an encrypted arc. Documents will be encrypted before storage.`,
 	Args: cobra.ExactArgs(2),
@@ -31,9 +31,15 @@ func init() {
 }
 
 func runAdd(cmd *cobra.Command, args []string) error {
-	arcID := args[0]
+	arcNameOrID := args[0]
 	path := args [1]
 
+	entry, err := arcManager.FindArc(arcNameOrID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Unlocking arc: %s\n", entry.Name)
 	fmt.Print("Enter password: ")
 	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
@@ -43,7 +49,7 @@ func runAdd(cmd *cobra.Command, args []string) error {
 
 	password := string(passwordBytes)
 
-	arc, key, err := arcManager.Unlock(arcID, password)
+	arc, key, err := arcManager.Unlock(entry.ID, password)
 	if err != nil {
 		return err
 	}
@@ -57,10 +63,10 @@ func runAdd(cmd *cobra.Command, args []string) error {
 		if !addRecursive {
 			return fmt.Errorf("path is a directory, use --recursive flag to add all files")
 		}
-		return addDirectory(arcID, arc, key, path)
+		return addDirectory(arcNameOrID, arc, key, path)
 	}
 
-	doc, err := arcManager.AddDocument(arcID, arc, key, path, addTags)
+	doc, err := arcManager.AddDocument(entry.ID, arc, key, path, addTags)
 	if err != nil {
 		return err
 	}

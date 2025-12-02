@@ -9,6 +9,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var listCmd = &cobra.Command{
+	Use: "list",
+	Short: "List all arcs",
+	Long: "List all arcs in the local storage directory.",
+	Aliases: []string{"ls"},
+	RunE: runList,
+}
+
+func init() {
+	rootCmd.AddCommand(listCmd)
+}
+
 func runList(cmd *cobra.Command, args []string) error {
 	arcs := arcManager.ListArcs()
 

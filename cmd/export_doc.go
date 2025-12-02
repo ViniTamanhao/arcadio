@@ -9,7 +9,7 @@ import (
 )
 
 var exportDocCmd = &cobra.Command{
-	Use: "export <arc-id> <doc-id> <output-path>",
+	Use: "export <arc-name-or-id> <doc-id> <output-path>",
 	Short: "Export a document from an arc",
 	Args: cobra.ExactArgs(3),
 	RunE: runExportDoc,
@@ -20,9 +20,16 @@ func init() {
 }
 
 func runExportDoc(cmd *cobra.Command, args []string) error {
-	arcID := args[0]
+	arcNameOrID := args[0]
 	docID := args[1]
 	outputPath := args[2]
+
+	entry, err := arcManager.FindArc(arcNameOrID)	
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Exporting arc: %s\n", entry.Name)
 
 	fmt.Print("Enter password: ")
 	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
@@ -33,12 +40,12 @@ func runExportDoc(cmd *cobra.Command, args []string) error {
 
 	password := string(passwordBytes)
 
-	arc, key, err := arcManager.Unlock(arcID, password)
+	arc, key, err := arcManager.Unlock(entry.ID, password)
 	if err != nil {
 		return err
 	}
 
-	if err := arcManager.ExportDocument(arcID, arc, key, docID, outputPath); err != nil {
+	if err := arcManager.ExportDocument(entry.ID, arc, key, docID, outputPath); err != nil {
 		return err
 	}
 

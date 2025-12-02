@@ -13,7 +13,7 @@ import (
 )
 
 var listDocsCmd = &cobra.Command{
-	Use:   "docs <arc-id>",
+	Use:   "docs <arc-name-or-id>",
 	Short: "List documents in an arc",
 	Args:  cobra.ExactArgs(1),
 	RunE:  runListDocs,
@@ -24,8 +24,14 @@ func init() {
 }
 
 func runListDocs(cmd *cobra.Command, args []string) error {
-	arcID := args[0]
+	arcNameOrID := args[0]
 
+	entry, err := arcManager.FindArc(arcNameOrID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Getting docs for arc: %s\n", entry.Name)
 	fmt.Print("Enter password: ")
 	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
@@ -35,7 +41,7 @@ func runListDocs(cmd *cobra.Command, args []string) error {
 
 	password := string(passwordBytes)
 
-	arc, _, err := arcManager.Unlock(arcID, password)
+	arc, _, err := arcManager.Unlock(arcNameOrID, password)
 	if err != nil {
 		return err
 	}

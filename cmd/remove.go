@@ -9,7 +9,7 @@ import (
 )
 
 var removeCmd = &cobra.Command{
-	Use:   "remove <arc-id> <doc-id>",
+	Use:   "remove <arc-name-or-id> <doc-id>",
 	Short: "Remove a document from an arc",
 	Aliases: []string{"rm"},
 	Args:  cobra.ExactArgs(2),
@@ -21,9 +21,15 @@ func init() {
 }
 
 func runRemove(cmd *cobra.Command, args []string) error {
-	arcID := args[0]
+	arcNameOrID := args[0]
 	docID := args[1]
 
+	entry, err := arcManager.FindArc(arcNameOrID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Removing from arc: %s\n", entry.Name)
 	fmt.Print("Enter password: ")
 	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
@@ -33,12 +39,12 @@ func runRemove(cmd *cobra.Command, args []string) error {
 
 	password := string(passwordBytes)
 
-	arc, key, err := arcManager.Unlock(arcID, password)
+	arc, key, err := arcManager.Unlock(entry.ID, password)
 	if err != nil {
 		return err
 	}
 
-	if err := arcManager.RemoveDocument(arcID, arc, key, docID); err != nil {
+	if err := arcManager.RemoveDocument(entry.ID, arc, key, docID); err != nil {
 		return err
 	}
 
