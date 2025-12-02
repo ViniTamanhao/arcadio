@@ -1,0 +1,46 @@
+package cmd
+
+import (
+	"fmt"
+	"syscall"
+
+	"github.com/spf13/cobra"
+	"golang.org/x/term"
+)
+
+var exportDocCmd = &cobra.Command{
+	Use: "export <arc-id> <doc-id> <output-path>",
+	Short: "Export a document from an arc",
+	Args: cobra.ExactArgs(3),
+	RunE: runExportDoc,
+}
+
+func init() {
+	rootCmd.AddCommand(exportDocCmd)
+}
+
+func runExportDoc(cmd *cobra.Command, args []string) error {
+	arcID := args[0]
+	docID := args[1]
+	outputPath := args[2]
+
+	fmt.Print("Enter password: ")
+	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return fmt.Errorf("failed to read password: %w", err)
+	}
+	fmt.Println()
+
+	password := string(passwordBytes)
+
+	arc, key, err := arcManager.Unlock(arcID, password)
+	if err != nil {
+		return err
+	}
+
+	if err := arcManager.ExportDocument(arcID, arc, key, docID, outputPath); err != nil {
+		return err
+	}
+
+	return nil
+}
