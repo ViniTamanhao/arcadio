@@ -23,6 +23,11 @@ func init() {
 func runInfo(cmd *cobra.Command, args []string) error {
 	arcNameOrID := args[0]
 
+	entry, err := arcManager.FindArc(arcNameOrID)
+	if err != nil {
+		return fmt.Errorf("failed to find arc: %w", err)
+	}
+
 	fmt.Print("Enter password: ")
 	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
@@ -32,7 +37,7 @@ func runInfo(cmd *cobra.Command, args []string) error {
 
 	password := string(passwordBytes)
 
-	arc, _, err := arcManager.Unlock(arcNameOrID, password)
+	arc, _, err := arcManager.Unlock(entry.ID, password)
 	if err != nil {
 		return fmt.Errorf("failed to unlock arc: %w", err)
 	}
