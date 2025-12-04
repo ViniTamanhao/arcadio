@@ -2,10 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"syscall"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/term"
 )
 
 var removeCmd = &cobra.Command{
@@ -30,14 +28,11 @@ func runRemove(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Printf("Removing from arc: %s\n", entry.Name)
-	fmt.Print("Enter password: ")
-	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
-	if err != nil {
-		return fmt.Errorf("failed to read password: %w", err)
-	}
-	fmt.Println()
 
-	password := string(passwordBytes)
+	password, err := authManager.GetPassword(entry.ID, entry.Name, true)
+	if err != nil {
+		return err
+	}
 
 	arc, key, err := arcManager.Unlock(entry.ID, password)
 	if err != nil {

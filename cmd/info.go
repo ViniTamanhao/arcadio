@@ -2,10 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"syscall"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/term"
 )
 
 var infoCmd = &cobra.Command{
@@ -28,14 +26,12 @@ func runInfo(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to find arc: %w", err)
 	}
 
-	fmt.Print("Enter password: ")
-	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
-	if err != nil {
-		return fmt.Errorf("failed to read password: %w", err)
-	}
-	fmt.Println()
 
-	password := string(passwordBytes)
+
+	password, err := authManager.GetPassword(entry.Name, entry.ID, true)
+	if err != nil {
+		return err
+	}
 
 	arc, _, err := arcManager.Unlock(entry.ID, password)
 	if err != nil {

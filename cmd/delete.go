@@ -14,7 +14,7 @@ var (
 )
 
 var deleteCmd = &cobra.Command{
-	Use: "delete <arc-name-or-id",
+	Use: "delete <arc-name-or-id>",
 	Short: "Delete an arc permanently",
 	Long: "Delete an arc and all its documents permanently. This cannot be undone!",
 	Aliases: []string{"rm", "del"},
@@ -31,6 +31,16 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	arcNameOrID := args[0]
 
 	entry, err := arcManager.FindArc(arcNameOrID)
+	if err != nil {
+		return err
+	}
+
+	password, err := authManager.GetPassword(entry.ID, entry.Name, true)
+	if err != nil {
+		return err
+	}
+
+	_, _, err = arcManager.Unlock(entry.ID, password)
 	if err != nil {
 		return err
 	}

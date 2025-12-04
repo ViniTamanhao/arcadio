@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"syscall"
 
 	"github.com/ViniTamanhao/arcadio/pkg/models"
 	"github.com/spf13/cobra"
-	"golang.org/x/term"
 )
 
 var (
@@ -39,15 +37,10 @@ func runAdd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Printf("Unlocking arc: %s\n", entry.Name)
-	fmt.Print("Enter password: ")
-	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
+	password, err := authManager.GetPassword(entry.ID, entry.Name, true)
 	if err != nil {
-		return fmt.Errorf("failed to read password: %w", err)
+		return err
 	}
-	fmt.Println()
-
-	password := string(passwordBytes)
 
 	arc, key, err := arcManager.Unlock(entry.ID, password)
 	if err != nil {

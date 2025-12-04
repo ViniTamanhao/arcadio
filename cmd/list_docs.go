@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"syscall"
 	"text/tabwriter"
 	"time"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/term"
 )
 
 var listDocsCmd = &cobra.Command{
@@ -32,14 +30,11 @@ func runListDocs(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Printf("Getting docs for arc: %s\n", entry.Name)
-	fmt.Print("Enter password: ")
-	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
-	if err != nil {
-		return fmt.Errorf("failed to read password: %w", err)
-	}
-	fmt.Println()
 
-	password := string(passwordBytes)
+	password, err := authManager.GetPassword(entry.ID, entry.Name, true)
+	if err != nil {
+		return err
+	}
 
 	arc, _, err := arcManager.Unlock(arcNameOrID, password)
 	if err != nil {
