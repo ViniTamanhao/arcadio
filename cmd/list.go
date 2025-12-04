@@ -40,7 +40,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	for _, arc := range arcs {
 		fmt.Fprintf(w, "%s\t%s\t%s\n", 
 			arc.Name,
-			arc.ID[:8]+"...",
+			arc.ID,
 			arc.CreatedAt.Format("2006-01-02 15:04"),
 		)
 	}
